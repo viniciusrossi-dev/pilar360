@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Pilar360 Admin</title>
+  <link rel="stylesheet" href="/src/css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout" id="admin-layout">
+    <!-- Conteúdo injetado dentro do <main> pelo admin-layout.js -->
+
+    <h1 class="admin-page-title">Dashboard</h1>
+    <p class="admin-page-subtitle">Visão geral do painel administrativo</p>
+
+    <!-- Stats -->
+    <div class="admin-stats" id="stats-grid">
+      <div class="admin-stat-card">
+        <div class="admin-stat-value">—</div>
+        <div class="admin-stat-label">Mensagens não lidas</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-value">—</div>
+        <div class="admin-stat-label">Posts publicados</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-value">—</div>
+        <div class="admin-stat-label">Unidades disponíveis</div>
+      </div>
+    </div>
+
+    <!-- Mensagens -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+      <h2 class="admin-section-title" style="margin-bottom:0;">Mensagens de Contato</h2>
+    </div>
+
+    <div class="admin-filter-bar" id="filter-bar">
+      <button class="admin-filter-btn active" data-filter="all">Todas</button>
+      <button class="admin-filter-btn" data-filter="unread">Não lidas</button>
+    </div>
+
+    <div class="admin-msg-list" id="messages-list">
+      <div class="admin-empty">
+        <div class="admin-empty-icon">✉️</div>
+        Carregando mensagens…
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/js/admin-dashboard.js"></script>
+</body>
+</html>

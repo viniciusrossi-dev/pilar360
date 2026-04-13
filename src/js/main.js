@@ -1,8 +1,10 @@
 import { renderHeader } from './header.js'
 import { renderFooter } from './footer.js'
+import { initContactForm } from './formspree.js'
 
 renderHeader()
 renderFooter()
+initContactForm()
 
 // Fade-in on scroll
 const observer = new IntersectionObserver((entries) => {

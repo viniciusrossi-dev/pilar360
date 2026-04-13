@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — Pilar360</title>
+  <meta name="description" content="Novidades, mercado imobiliário e dicas da Pilar360.">
+  <link rel="stylesheet" href="/src/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- NAV -->
+  <div id="site-header"></div>
+
+  <!-- HERO -->
+  <section class="blog-hero">
+    <div class="fade-in">
+      <span class="section-label">Blog</span>
+      <h1 class="section-title">Novidades e<br>conteúdo.</h1>
+    </div>
+  </section>
+
+  <!-- FILTROS -->
+  <div class="blog-filters fade-in" id="blog-filters">
+    <button class="blog-filter-btn active" data-cat="todos">Todos</button>
+    <button class="blog-filter-btn" data-cat="Empresa">Empresa</button>
+    <button class="blog-filter-btn" data-cat="Mercado">Mercado</button>
+    <button class="blog-filter-btn" data-cat="Dicas">Dicas</button>
+  </div>
+
+  <!-- GRID -->
+  <section class="blog-section">
+    <div class="blog-grid" id="blog-grid"></div>
+    <div style="text-align:center;margin-top:3rem;">
+      <button class="btn-outline" id="btn-load-more" style="display:none;">Carregar mais</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div id="site-footer"></div>
+
+  <script type="module" src="/src/js/blog.js"></script>
+</body>
+</html>

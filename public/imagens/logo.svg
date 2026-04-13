@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 420" width="400" height="420">
+  
+  <!-- Background (transparent) -->
+  
+  <!-- Outer circle -->
+  <circle cx="200" cy="170" r="130" fill="none" stroke="#7AB648" stroke-width="7"/>
+
+  <!-- Pilar base (bottom plate) -->
+  <rect x="130" y="255" width="140" height="14" rx="3" fill="#C8C8C8"/>
+  
+  <!-- Pilar shaft - 3 columns -->
+  <rect x="143" y="145" width="26" height="110" rx="2" fill="#C8C8C8"/>
+  <rect x="187" y="145" width="26" height="110" rx="2" fill="#C8C8C8"/>
+  <rect x="231" y="145" width="26" height="110" rx="2" fill="#C8C8C8"/>
+
+  <!-- Pilar capital (top plate) -->
+  <rect x="127" y="130" width="146" height="16" rx="3" fill="#C8C8C8"/>
+
+  <!-- Pilar abacus (top small plate) -->
+  <rect x="140" y="115" width="120" height="16" rx="3" fill="#C8C8C8"/>
+
+  <!-- Two decorative dots -->
+  <circle cx="108" cy="190" r="7" fill="#7AB648"/>
+  <circle cx="292" cy="190" r="7" fill="#7AB648"/>
+
+  <!-- Text: PILAR -->
+  <text 
+    x="200" 
+    y="360" 
+    text-anchor="middle" 
+    font-family="'Arial Black', 'Arial Bold', sans-serif" 
+    font-weight="900"
+    font-size="72"
+    letter-spacing="6"
+    fill="#C8C8C8">PILAR</text>
+
+  <!-- Text: 360 -->
+  <text 
+    x="200" 
+    y="410" 
+    text-anchor="middle" 
+    font-family="'Arial Black', 'Arial Bold', sans-serif" 
+    font-weight="900"
+    font-size="72"
+    letter-spacing="6"
+    fill="#7AB648">360</text>
+
+</svg>

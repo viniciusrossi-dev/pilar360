@@ -22,8 +22,8 @@ export function iniciarMovimento(raiz = document) {
   if (reduz) return
   document.documentElement.classList.add('m')
 
-  // títulos de seção: palavras sobem
-  raiz.querySelectorAll('.titulo, .port-nome, .capa-titulo, .p-cabeca .titulo-xl').forEach(el => {
+  // só as aberturas têm as palavras subindo; o resto entra de forma discreta
+  raiz.querySelectorAll('.capa-titulo, .p-cabeca .titulo-xl').forEach(el => {
     quebrarPalavras(el)
     el.classList.add('rv-palavras')
   })
@@ -35,7 +35,7 @@ export function iniciarMovimento(raiz = document) {
     ;[...lista.children].forEach((li, i) => li.style.setProperty('--i', i))
   })
   // blocos de texto simples
-  raiz.querySelectorAll('.tese-frase, .tese-lado, .bloco-cabeca .texto, .port-info > :not(.port-nome), .caminho .subtitulo, .caminho .section-label, .onde-grade .lead, .onde-grade .texto, .carimbo, .sim, .p-cta .btn, .contato-form, .contato-canais, .p-cabeca .lead, .p-cabeca .ficha, .p-cabeca .estagio')
+  raiz.querySelectorAll('.titulo, .port-nome, .tese-frase, .tese-lado, .bloco-cabeca .texto, .port-info > :not(.port-nome), .caminho .subtitulo, .caminho .section-label, .onde-grade .lead, .onde-grade .texto, .carimbo, .sim, .p-cta .btn, .contato-form, .contato-canais, .p-cabeca .lead, .p-cabeca .ficha, .p-cabeca .estagio')
     .forEach(el => el.classList.add('rv-sobe'))
 
   const obs = new IntersectionObserver((entradas) => {

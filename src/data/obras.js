@@ -7,7 +7,7 @@ export const EMPRESA = {
   cnpj: '57.784.268/0001-89',
   whatsapp: '5551992143280',
   whatsappLabel: '(51) 99214-3280',
-  email: 'viniciusrossi@hotmail.com.br',
+  email: 'contatopilar360@gmail.com',
   instagram: 'pilar360.construtora',
   regiao: 'Grande Porto Alegre',
 }

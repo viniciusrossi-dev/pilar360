@@ -5,14 +5,14 @@ export function renderHeader() {
   placeholder.innerHTML = `
     <nav>
       <a href="/" class="nav-logo">
-        <img src="/imagens/logo.svg" alt="Pilar360">
+        <img src="/imagens/logo.svg" alt="Pilar 360 — Construtora e Incorporadora">
       </a>
       <ul class="nav-links">
-        <li><a href="/#sobre">Sobre</a></li>
         <li><a href="/#projetos">Projetos</a></li>
+        <li><a href="/#sobre">Sobre</a></li>
         <li><a href="/blog.html">Blog</a></li>
-        <li><a href="/#valores">Nossa Essência</a></li>
-        <li><a href="/#contato" class="nav-cta">Falar com a gente</a></li>
+        <li><a href="/#investidor" class="nav-cta-ghost">Quero investir</a></li>
+        <li><a href="/#contato" class="nav-cta">💬 Quero morar</a></li>
       </ul>
       <button class="nav-hamburger" aria-label="Abrir menu" aria-expanded="false">
         <span></span>
@@ -31,11 +31,15 @@ export function renderHeader() {
     hamburger.setAttribute('aria-expanded', isOpen)
   })
 
+  // fecha o menu ao navegar
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    navLinks.classList.remove('nav-open')
+    hamburger.classList.remove('active')
+  }))
+
   window.addEventListener('scroll', () => {
     const nav = placeholder.querySelector('nav')
     if (!nav) return
-    nav.style.background = window.scrollY > 50
-      ? 'rgba(10,10,10,0.97)'
-      : 'rgba(10,10,10,0.9)'
+    nav.classList.toggle('scrolled', window.scrollY > 50)
   })
 }

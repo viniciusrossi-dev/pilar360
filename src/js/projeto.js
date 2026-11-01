@@ -503,4 +503,14 @@ async function init() {
   initFadeObserver()
 }
 
-init()
+init().catch(() => {
+  const main = document.getElementById('projeto-content')
+  if (main) {
+    main.innerHTML = `
+      <div class="projeto-loading">
+        <p>Não foi possível carregar o projeto agora.</p>
+        <a href="/#contato" class="btn-primary" style="margin-top:1.5rem;">Falar com a gente</a>
+      </div>
+    `
+  }
+})

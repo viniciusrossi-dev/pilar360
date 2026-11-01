@@ -22,7 +22,7 @@ export function renderFooter() {
           <div class="rodape-col">
             <b>${EMPRESA.nome}</b>
             <span>CNPJ ${EMPRESA.cnpj}</span>
-            <span>Obras na ${EMPRESA.rua} (antiga ${EMPRESA.ruaApelido}), ${EMPRESA.bairro}, ${EMPRESA.cidade}</span>
+            <span>${EMPRESA.regiao} · RS</span>
             <p class="rodape-legal">Renders são ilustrativos e indicados como tal. Condições do Minha Casa Minha Vida seguem as regras vigentes da Caixa.</p>
           </div>
         </div>

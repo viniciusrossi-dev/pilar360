@@ -23,9 +23,9 @@ export function renderHeader(atual = '') {
         <a href="/" class="topo-logo"><img src="/imagens/logo.svg" alt="Pilar 360 — página inicial" width="150" height="40"></a>
         <button class="topo-menu" aria-expanded="false" aria-controls="topo-nav">Menu</button>
         <ul class="topo-nav" id="topo-nav">
-          <li><a href="/#obras"${cur('obras')}>Obras</a></li>
-          <li><a href="/#empresa"${cur('empresa')}>A empresa</a></li>
-          <li><a href="/#diario"${cur('diario')}>Diário de obra</a></li>
+          <li><a href="/#empreendimentos"${cur('empreendimentos')}>Empreendimentos</a></li>
+          <li><a href="/#modelo">Como trabalhamos</a></li>
+          <li><a href="/#investir">Para investir</a></li>
           <li><a href="/blog.html"${cur('blog')}>Blog</a></li>
           <li>${waBotao('WhatsApp')}</li>
         </ul>

@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pilar 360 — Construtora e Incorporadora | Alvorada, Grande Porto Alegre</title>
-  <meta name="description" content="A Pilar 360 constrói prédios pequenos de apartamentos de 1 dormitório no Jardim Algarve, em Alvorada. Acompanhe as obras, o cronograma e o diário de obra.">
-  <meta property="og:title" content="Pilar 360 — um prédio de cada vez">
-  <meta property="og:description" content="Apartamentos de 1 dormitório em Alvorada, adequados ao Minha Casa Minha Vida, com obra acompanhada à vista.">
-  <meta property="og:image" content="/imagens/aloha-dia.jpg">
+  <title>Pilar 360 — Construtora e Incorporadora | Grande Porto Alegre</title>
+  <meta name="description" content="A Pilar 360 desenvolve e constrói residenciais compactos na Grande Porto Alegre, com o cuidado de projeto que o primeiro imóvel merece.">
+  <meta property="og:title" content="Pilar 360 — primeiro lar, projeto de verdade">
+  <meta property="og:description" content="Residenciais compactos na Grande Porto Alegre, adequados ao Minha Casa Minha Vida.">
+  <meta property="og:image" content="/imagens/aloha-noite.jpg">
   <link rel="icon" type="image/svg+xml" href="/imagens/favicon.svg">
   <link rel="icon" type="image/png" sizes="48x48" href="/imagens/favicon-48.png">
   <link rel="apple-touch-icon" href="/imagens/apple-touch-icon.png">
@@ -20,65 +20,73 @@
 
   <main id="conteudo">
 
-    <!-- ABERTURA: a rua -->
-    <section class="abertura">
-      <div class="wrap">
-        <div class="abertura-texto">
-          <h1 class="titulo-xl">Um prédio de cada vez.</h1>
-          <div class="abertura-lado">
-            <p class="lead">Construímos prédios pequenos de apartamentos de 1 dormitório no Jardim Algarve, em Alvorada. Compactos, bem acabados e adequados ao Minha Casa Minha Vida. O primeiro está pronto. O segundo começa agora, na mesma rua.</p>
-            <div class="abertura-acoes" id="abertura-acoes"></div>
-          </div>
+    <!-- ABERTURA -->
+    <section class="capa">
+      <img class="capa-img" src="/imagens/aloha-noite.jpg" alt="Fachada do Residencial Aloha ao anoitecer">
+      <div class="wrap capa-in">
+        <h1 class="titulo-xl capa-titulo">Primeiro lar, projeto de verdade.</h1>
+        <p class="capa-texto">Residenciais compactos na Grande Porto Alegre, com o cuidado de projeto que o primeiro imóvel merece.</p>
+        <div class="capa-acoes">
+          <a class="btn" href="#empreendimentos">Conhecer os empreendimentos</a>
+          <a class="link link-claro" href="#investir">Quero investir</a>
         </div>
-        <div class="rua" id="rua"></div>
+      </div>
+      <span class="capa-legenda">Residencial Aloha · render</span>
+    </section>
+
+    <!-- TESE -->
+    <section class="bloco tese" aria-label="Quem somos">
+      <div class="wrap tese-grade">
+        <p class="tese-frase">A Pilar 360 desenvolve e constrói residenciais compactos para quem está comprando o primeiro imóvel e para quem investe em renda de aluguel.</p>
+        <div class="tese-lado">
+          <p class="texto">Acreditamos que apartamento acessível pode ter fachada bonita, planta bem resolvida e condomínio que cabe no bolso. Organizamos o nosso jeito de trabalhar para repetir isso a cada novo empreendimento.</p>
+          <a class="link" href="#modelo">Como trabalhamos</a>
+        </div>
       </div>
     </section>
 
-    <!-- OBRAS -->
-    <section class="bloco" id="obras" aria-labelledby="obras-t">
+    <!-- MODELO -->
+    <section class="bloco modelo" id="modelo" aria-labelledby="modelo-t">
+      <div class="wrap">
+        <h2 class="titulo" id="modelo-t">Um modelo feito para se repetir</h2>
+        <ol class="passos">
+          <li>
+            <span class="passo-n">1</span>
+            <h3>Terreno bem escolhido</h3>
+            <p>Bairros com comércio, transporte e procura real por moradia compacta. É a escolha do terreno que permite um preço justo lá na frente.</p>
+          </li>
+          <li>
+            <span class="passo-n">2</span>
+            <h3>Projeto compacto e bonito</h3>
+            <p>Plantas de 1 dormitório sem metro quadrado perdido, área externa sempre que possível e fachada pensada desde o primeiro traço.</p>
+          </li>
+          <li>
+            <span class="passo-n">3</span>
+            <h3>Obra com gestão própria</h3>
+            <p>Equipe de confiança, compras planejadas e acompanhamento semanal de custo e prazo. Quem decide está na obra.</p>
+          </li>
+          <li>
+            <span class="passo-n">4</span>
+            <h3>Entrega documentada</h3>
+            <p>Projeto aprovado, responsável técnico, habite-se e manual do proprietário. O que garante a sua compra fica no papel.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- EMPREENDIMENTOS -->
+    <section class="bloco" id="empreendimentos" aria-labelledby="emp-t">
       <div class="wrap">
         <div class="bloco-cabeca">
-          <h2 class="titulo" id="obras-t">As obras</h2>
-          <p class="texto">Cada prédio tem uma página com ficha técnica, cronograma e diário de obra. O que está pronto aparece como pronto; o que está em obra aparece com o avanço real.</p>
+          <h2 class="titulo" id="emp-t">Empreendimentos</h2>
+          <p class="texto">Cada empreendimento tem página própria, com fotos, ficha técnica, as fases da obra e as novidades do canteiro.</p>
         </div>
-        <div id="lista-obras"></div>
-      </div>
-    </section>
-
-    <!-- A EMPRESA -->
-    <section class="bloco empresa" id="empresa" aria-labelledby="empresa-t">
-      <div class="wrap empresa-grade">
-        <div class="empresa-intro">
-          <h2 class="titulo" id="empresa-t">Quem constrói</h2>
-          <p class="lead" style="margin-top:1.4rem">A Pilar 360 é uma construtora e incorporadora pequena, fundada em 2024 na Grande Porto Alegre, para provar que habitação acessível pode ter projeto bem resolvido.</p>
-          <div class="principios">
-            <div class="principio">
-              <b>Estética em toda faixa de preço</b>
-              <p>Fachada pensada, bom acabamento e iluminação cuidada também no apartamento de entrada.</p>
-            </div>
-            <div class="principio">
-              <b>Condomínio enxuto</b>
-              <p>Prédios de poucas unidades, sem elevador e com medidor de água individual. A taxa de condomínio fica baixa.</p>
-            </div>
-            <div class="principio">
-              <b>Obra documentada</b>
-              <p>Alvará, responsável técnico e matrícula de cada prédio ficam publicados na página da obra, junto com o cronograma.</p>
-            </div>
-            <div class="principio">
-              <b>Você fala com quem constrói</b>
-              <p>Atendimento direto com os sócios, da primeira visita à entrega das chaves com manual do proprietário.</p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <h3 class="subtitulo" style="margin-bottom:1.6rem">De onde viemos, para onde vamos</h3>
-          <ol class="historia" id="historia"></ol>
-        </div>
+        <div class="portfolio" id="portfolio"></div>
       </div>
     </section>
 
     <!-- CAMINHOS -->
-    <section class="bloco" id="caminhos" aria-labelledby="caminhos-t">
+    <section class="bloco empresa" id="caminhos" aria-labelledby="caminhos-t">
       <div class="wrap">
         <h2 class="sr-only" id="caminhos-t">Para morar ou para investir</h2>
         <div class="caminhos-grade">
@@ -86,19 +94,19 @@
             <p class="section-label">Para morar</p>
             <h3 class="subtitulo">Sair do aluguel com uma parcela que cabe no mês.</h3>
             <ul>
-              <li>Apartamentos de 1 dormitório, com pátio no térreo ou sacada nos andares de cima.</li>
+              <li>Apartamentos de 1 dormitório, com pátio ou sacada.</li>
               <li>Financiamento pelo Minha Casa Minha Vida, pela Caixa.</li>
-              <li>Jardim Algarve, em Alvorada, na Grande Porto Alegre.</li>
+              <li>Atendimento direto com quem constrói, da visita à entrega das chaves.</li>
             </ul>
             <div id="cta-morar"></div>
           </div>
-          <div class="caminho" id="investidor">
+          <div class="caminho" id="investir">
             <p class="section-label">Para investir</p>
-            <h3 class="subtitulo">Imóvel compacto, para renda de aluguel.</h3>
+            <h3 class="subtitulo">Imóvel compacto, feito para alugar bem.</h3>
             <ul>
-              <li>Unidades pequenas numa região com procura constante por aluguel.</li>
-              <li>Você acompanha custo, cronograma e diário da obra como nós acompanhamos.</li>
-              <li>Os próximos lotes da Rua 125 estão em estudo. Conversamos sobre participação caso a caso.</li>
+              <li>Unidades pequenas em regiões com procura constante por aluguel.</li>
+              <li>Acompanhamento transparente de cada obra.</li>
+              <li>Novos empreendimentos em estudo. Conversamos sobre participação caso a caso.</li>
             </ul>
             <div id="cta-investir"></div>
           </div>
@@ -106,14 +114,15 @@
       </div>
     </section>
 
-    <!-- DIÁRIO -->
-    <section class="bloco" id="diario" aria-labelledby="diario-t" style="padding-top:0">
-      <div class="wrap">
-        <div class="bloco-cabeca">
-          <h2 class="titulo" id="diario-t">Diário de obra</h2>
-          <p class="texto">Os registros mais recentes das duas obras. Fotos e vídeos do dia a dia saem também no Instagram <a class="link" href="https://instagram.com/pilar360.construtora" target="_blank" rel="noopener">@pilar360.construtora</a>.</p>
+    <!-- ONDE ATUAMOS -->
+    <section class="bloco" id="onde" aria-labelledby="onde-t">
+      <div class="wrap onde-grade">
+        <h2 class="titulo" id="onde-t">Onde atuamos</h2>
+        <div>
+          <p class="lead">Grande Porto Alegre. Começamos por Alvorada, onde a procura por um primeiro imóvel de qualidade é grande e a oferta ainda é pequena.</p>
+          <p class="texto" style="margin-top:1.2rem">Tem um terreno na região? Avaliamos compra e permuta por unidades do empreendimento.</p>
+          <div id="cta-terreno" style="margin-top:1.6rem"></div>
         </div>
-        <ol class="diario" id="diario-lista"></ol>
       </div>
     </section>
 
@@ -121,8 +130,8 @@
     <section class="bloco empresa" id="contato" aria-labelledby="contato-t">
       <div class="wrap contato-grade">
         <div>
-          <h2 class="titulo" id="contato-t">Fale com quem constrói</h2>
-          <p class="lead" style="margin-top:1.4rem">Quer morar, investir, vender um terreno ou trabalhar com a gente? A conversa é direta com os sócios.</p>
+          <h2 class="titulo" id="contato-t">Fale com a gente</h2>
+          <p class="lead" style="margin-top:1.4rem">Quer morar, investir, oferecer um terreno ou trabalhar com a Pilar? A conversa é direta com os sócios.</p>
           <div class="contato-canais" id="contato-canais"></div>
         </div>
         <form class="contato-form" novalidate>

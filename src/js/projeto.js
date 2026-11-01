@@ -1,41 +1,45 @@
 import { renderHeader, waBotao } from './header.js'
 import { renderFooter } from './footer.js'
-import { getProjeto, semanaAtual } from '../data/obras.js'
-import { barraAvanco, itemDiario, esc } from './obras-ui.js'
+import { getProjeto, faseAtual } from '../data/obras.js'
+import { trilhaFases, dataExtenso, esc } from './obras-ui.js'
 
-renderHeader('obras')
+renderHeader('empreendimentos')
 renderFooter()
 
 const main = document.getElementById('projeto-content')
 const slug = new URLSearchParams(location.search).get('id')
 const p = getProjeto(slug)
-
-const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 const brl = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v)
 
 if (!p) {
   main.innerHTML = `<div class="wrap p-erro">
-    <h1 class="titulo">Obra não encontrada</h1>
-    <p class="lead" style="margin:1rem 0 2rem">O endereço pode ter mudado. As obras atuais estão na página inicial.</p>
-    <a class="btn-outline" href="/#obras">Ver as obras</a></div>`
+    <h1 class="titulo">Empreendimento não encontrado</h1>
+    <p class="lead" style="margin:1rem 0 2rem">O endereço pode ter mudado. Os empreendimentos atuais estão na página inicial.</p>
+    <a class="btn-outline" href="/#empreendimentos">Ver os empreendimentos</a></div>`
 } else {
   document.title = `${p.nome} — Pilar 360`
-  document.querySelector('meta[name="description"]')?.setAttribute('content', `${p.nome}, Rua 125 nº ${p.numero}, Alvorada: ${p.resumo}`)
-  main.innerHTML = [cabeca(), visual(), ficha(), cronograma(), diario(), simulador(), cta()].join('')
+  document.querySelector('meta[name="description"]')?.setAttribute('content', `${p.nome}: ${p.resumo}`)
+  main.innerHTML = [cabeca(), visual(), sobre(), obra(), diario(), simulador(), cta()].join('')
   ligar3d()
   ligarSimulador()
 }
 
 function cabeca() {
   return `<section class="p-cabeca"><div class="wrap">
-    <a class="p-voltar" href="/#obras">← Todas as obras</a>
+    <a class="p-voltar" href="/#empreendimentos">← Empreendimentos</a>
     <div class="p-cabeca-grade">
       <div>
-        <p class="p-endereco">Nº ${p.numero} · Rua 125 · Lote ${p.lote}</p>
-        <h1 class="titulo-xl">${esc(p.nome)}</h1>
-        <p class="lead">${esc(p.resumo)}</p>
+        <span class="estagio${p.status === 'pronto' ? ' estagio-ok' : ''}">${esc(p.estagio)}</span>
+        <h1 class="titulo-xl" style="margin-top:.6rem">${esc(p.nome)}</h1>
       </div>
-      <div>${barraAvanco(p)}</div>
+      <div>
+        <p class="lead">${esc(p.resumo)}</p>
+        <dl class="ficha" style="margin-top:1.6rem">
+          <div><dt>apartamentos</dt><dd class="num">${p.unidades}</dd></div>
+          <div><dt>tipologia</dt><dd>${esc(p.tipologia)}</dd></div>
+          <div><dt>por unidade</dt><dd>${esc(p.areaUnidade)}</dd></div>
+        </dl>
+      </div>
     </div>
   </div></section>`
 }
@@ -44,13 +48,13 @@ function visual() {
   if (p.tem3d) {
     return `<section><div class="wrap">
       <div class="p-visual" id="p-3d">
-        <div class="p-3d-capa" style="background-image:url('${p.imagem}');aspect-ratio:16/9">
-          <button class="btn" id="abrir-3d" type="button">Abrir o prédio em 3D</button>
+        <div class="p-3d-capa" style="background-image:url('${p.imagem}')">
+          <button class="btn" id="abrir-3d" type="button">Explorar o prédio em 3D</button>
           <figcaption>${esc(p.imagemTipo)}</figcaption>
         </div>
       </div>
       <div class="p-visual-barra">
-        <span>Modelo 3D montado a partir da planta aprovada. Arraste para girar; troque de pavimento e de horário no painel.</span>
+        <span>Modelo 3D feito a partir do projeto aprovado. Gire o prédio, entre nos pavimentos e veja de dia ou de noite.</span>
         <a href="/3d/${p.slug.replace('residencial-', '')}.html" target="_blank" rel="noopener">Abrir em tela cheia</a>
       </div>
     </div></section>`
@@ -63,66 +67,33 @@ function visual() {
   </div></section>`
 }
 
-function ficha() {
+function sobre() {
   return `<section class="bloco"><div class="wrap p-duas">
     <div>
-      <h2 class="titulo">Ficha técnica</h2>
-      <p class="texto" style="margin-top:1.2rem">Os dados que aparecem na placa da obra e nos documentos do prédio. Matrícula e alvará podem ser conferidos no Registro de Imóveis e na Prefeitura de Alvorada.</p>
-      <dl class="ficha" style="margin-top:2rem">
-        <div><dt>apartamentos</dt><dd class="num">${p.unidades}</dd></div>
-        <div><dt>por unidade</dt><dd>${esc(p.areaUnidade)}</dd></div>
-        <div><dt>terreno</dt><dd>${esc(p.terreno)}</dd></div>
-      </dl>
+      <h2 class="titulo">${esc(p.chamada)}</h2>
+      <ul class="destaques">${p.destaques.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
     </div>
-    <dl class="carimbo">
-      <div class="carimbo-titulo"><img src="/imagens/logo.svg" alt="Pilar 360"><span>${esc(p.sistema)}</span></div>
-      ${p.carimbo.map(([k, v]) => `<div class="c"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
-    </dl>
+    <div>
+      <dl class="carimbo">
+        <div class="carimbo-titulo"><img src="/imagens/logo.svg" alt="Pilar 360"><span>Documentação</span></div>
+        ${p.carimbo.map(([k, v]) => `<div class="c"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
+      </dl>
+      <p class="form-nota" style="margin-top:.8rem">Dados públicos do registro de imóveis e da prefeitura, para você conferir.</p>
+    </div>
   </div></section>`
 }
 
-function cronograma() {
-  if (!p.etapas) return ''
-  const total = p.duracaoSemanas
-  const ini = new Date(p.inicio + 'T00:00:00')
-  const sem = semanaAtual(p)
-  const diasTot = total * 7
-  const hojePct = sem > 0 ? Math.min(100, (Date.now() - ini) / 86400000 / diasTot * 100) : null
-
-  // escala de meses
-  let meses = ''
-  const d = new Date(ini.getFullYear(), ini.getMonth() + 1, 1)
-  while ((d - ini) / 86400000 < diasTot) {
-    const pos = (d - ini) / 86400000 / diasTot * 100
-    const rot = d.getMonth() === 0 ? `${MESES[0]} ${String(d.getFullYear()).slice(2)}` : MESES[d.getMonth()]
-    if (d.getMonth() % 2 === 0 || d.getMonth() === 0) meses += `<span style="left:${pos}%">${rot}</span>`
-    d.setMonth(d.getMonth() + 1)
-  }
-
-  const linhas = p.etapas.map(e => {
-    const l = (e.semIni - 1) / total * 100
-    const w = (e.semFim - e.semIni + 1) / total * 100
-    return `<div class="crono-linha">
-      <span class="crono-nome"><i>${e.n}</i>${esc(e.nome)}</span>
-      <div class="crono-trilho">
-        <div class="crono-plan" style="left:${l}%;width:${w}%"><div class="crono-feito" style="width:${e.pct}%"></div></div>
-        ${hojePct !== null ? `<div class="crono-hoje" style="left:${hojePct}%"></div>` : ''}
-      </div>
-      <span class="crono-pct${e.pct === 100 ? ' ok' : ''}">${e.pct}%</span>
-    </div>`
-  }).join('')
-
-  const inicioTxt = `${ini.getDate()} de ${['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][ini.getMonth()]} de ${ini.getFullYear()}`
-  return `<section class="bloco" id="cronograma" style="padding-top:0"><div class="wrap">
+function obra() {
+  const pronto = p.status === 'pronto'
+  const texto = pronto
+    ? 'Todas as fases concluídas.'
+    : `Agora: ${faseAtual(p).toLowerCase()}. Entrega prevista para o ${p.entregaPrevista}.`
+  return `<section class="bloco" style="padding-top:0"><div class="wrap">
     <div class="bloco-cabeca">
-      <h2 class="titulo">Cronograma</h2>
-      <p class="texto">As ${p.etapas.length} etapas do contrato de execução, em ${total} semanas contadas a partir da furação das estacas (${sem > 0 ? 'iniciada em' : 'prevista para'} ${inicioTxt}). O avanço de cada etapa é atualizado depois da reunião semanal de obra.</p>
+      <h2 class="titulo">A obra</h2>
+      <p class="texto">${texto}</p>
     </div>
-    <div class="crono" role="table" aria-label="Cronograma de etapas da obra">
-      <div class="crono-escala" aria-hidden="true"><span>Etapa</span><div class="crono-meses">${meses}</div><span style="text-align:right">feito</span></div>
-      ${linhas}
-    </div>
-    <div class="crono-legenda"><span><i></i>planejado</span><span><i class="f"></i>executado</span>${hojePct !== null ? '<span><i class="h"></i>hoje</span>' : ''}</div>
+    ${trilhaFases(p)}
   </div></section>`
 }
 
@@ -131,10 +102,16 @@ function diario() {
   if (!d.length) return ''
   return `<section class="bloco" style="padding-top:0"><div class="wrap">
     <div class="bloco-cabeca">
-      <h2 class="titulo">Diário de obra</h2>
-      <p class="texto">Do mais recente para o mais antigo.</p>
+      <h2 class="titulo">Diário do ${esc(p.nome.replace('Residencial ', ''))}</h2>
+      <p class="texto">Novidades do canteiro, da mais recente para a mais antiga. Fotos e vídeos também no nosso Instagram.</p>
     </div>
-    <ol class="diario sem-obra">${d.map(e => itemDiario(e)).join('')}</ol>
+    <ol class="diario">${d.map(e => `
+      <li>
+        ${e.foto ? `<img src="${e.foto}" alt="" loading="lazy">` : ''}
+        <time datetime="${e.data}">${dataExtenso(e.data)}</time>
+        <h3>${esc(e.titulo)}</h3>
+        <p>${esc(e.texto)}</p>
+      </li>`).join('')}</ol>
   </div></section>`
 }
 
@@ -164,8 +141,8 @@ function ligar3d() {
   const b = document.getElementById('abrir-3d')
   if (!b) return
   b.addEventListener('click', () => {
-    const box = document.getElementById('p-3d')
-    box.innerHTML = `<iframe src="/3d/${p.slug.replace('residencial-', '')}.html" title="${esc(p.nome)} em 3D" allow="fullscreen" loading="eager"></iframe>`
+    document.getElementById('p-3d').innerHTML =
+      `<iframe src="/3d/${p.slug.replace('residencial-', '')}.html" title="${esc(p.nome)} em 3D" allow="fullscreen"></iframe>`
   })
 }
 

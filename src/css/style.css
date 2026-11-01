@@ -424,3 +424,88 @@ a { color: inherit; }
 .ficha dt { font-size: .85rem; color: var(--suave); }
 .ficha dd { font-family: var(--display); font-size: 1.7rem; line-height: 1.1; color: var(--preto); }
 @media (max-width: 560px) { .ficha { gap: .2rem 1.4rem; } }
+
+/* ============================================================
+   MOVIMENTO
+   Só vale com .m no <html> (ligado pelo motion.js, nunca com
+   prefers-reduced-motion). Uma curva só para tudo: saída suave.
+   ============================================================ */
+:root { --curva: cubic-bezier(.22, 1, .36, 1); --curva-cortina: cubic-bezier(.77, 0, .18, 1); }
+
+/* palavras sobem de dentro de uma máscara */
+.pl { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; margin-bottom: -.06em; }
+.pl-in { display: inline-block; }
+.m .rv-palavras .pl-in { transform: translateY(105%); transition: transform 1s var(--curva); transition-delay: calc(var(--i) * 55ms); }
+.m .rv-palavras.em-vista .pl-in { transform: none; }
+
+/* imagens: cortina de baixo para cima, com a foto assentando */
+.m .rv-img { clip-path: inset(100% 0 0 0); transition: clip-path 1.25s var(--curva-cortina); }
+.m .rv-img img, .m .rv-img .p-3d-capa { transform: scale(1.14); transition: transform 1.8s var(--curva); }
+.m .rv-img.em-vista { clip-path: inset(0 0 0 0); }
+.m .rv-img.em-vista img, .m .rv-img.em-vista .p-3d-capa { transform: none; }
+.m .port:hover .rv-img.em-vista img { transform: scale(1.03); transition-duration: .6s; }
+.port:not(.port-maior) .rv-img { transition-delay: .15s; }
+
+/* textos: sobem e aparecem */
+.m .rv-sobe { opacity: 0; transform: translateY(26px); transition: opacity .9s var(--curva), transform .9s var(--curva); transition-delay: .12s; }
+.m .rv-sobe.em-vista { opacity: 1; transform: none; }
+
+/* sequências: cada item depois do anterior */
+.m .rv-seq > * { opacity: 0; transform: translateY(22px); transition: opacity .8s var(--curva), transform .8s var(--curva); transition-delay: calc(var(--i) * 110ms + .1s); }
+.m .rv-seq.em-vista > * { opacity: 1; transform: none; }
+
+/* o fio preto dos 4 passos se desenha da esquerda para a direita */
+.passos { position: relative; border-top-color: transparent; }
+.passos::before { content: ''; position: absolute; top: -1.5px; left: 0; right: 0; height: 1.5px; background: var(--preto); transform-origin: left; }
+.m .passos::before { transform: scaleX(0); transition: transform 1.4s var(--curva-cortina); }
+.m .passos.em-vista::before { transform: none; }
+.m .passos .passo-n { display: inline-block; transform: translateY(40%); opacity: 0; transition: transform 1s var(--curva), opacity 1s var(--curva); transition-delay: calc(var(--i) * 140ms + .35s); }
+.m .passos.em-vista .passo-n { transform: none; opacity: 1; }
+.passos li { --i: 0; }
+.passos li:nth-child(2) .passo-n { --i: 1; } .passos li:nth-child(3) .passo-n { --i: 2; } .passos li:nth-child(4) .passo-n { --i: 3; }
+
+/* fases da obra: a linha verde avança fase a fase */
+.fase::before { transform-origin: left; }
+.m .fases .fase::before { transform: scaleX(0); transition: transform .7s var(--curva-cortina); transition-delay: calc(var(--i) * 160ms + .2s); }
+.m .fases.em-vista .fase::before { transform: none; }
+.m .fases .fase-marca { transform: scale(0); transition: transform .5s var(--curva); transition-delay: calc(var(--i) * 160ms + .1s); }
+.m .fases.em-vista .fase-marca { transform: none; }
+@media (max-width: 760px) { .fase::before { transform-origin: top; } .m .fases .fase::before { transform: scaleY(0); } }
+
+/* capa: imagem assenta, título sobe, texto e botões chegam depois */
+.capa-img { will-change: transform; }
+.m .capa .capa-img { transform: scale(1.12); opacity: 0; transition: transform 2.6s var(--curva), opacity 1.2s ease; }
+.m .capa.capa-entrou .capa-img { opacity: 1; transform: scale(1.04); }
+.m .capa .rv-palavras .pl-in { transition-duration: 1.2s; transition-delay: calc(var(--i) * 70ms + .35s); }
+.m .capa .capa-texto, .m .capa .capa-acoes, .m .capa .capa-legenda { opacity: 0; transform: translateY(18px); transition: opacity 1s var(--curva), transform 1s var(--curva); }
+.m .capa.capa-entrou .capa-texto { opacity: 1; transform: none; transition-delay: 1.15s; }
+.m .capa.capa-entrou .capa-acoes { opacity: 1; transform: none; transition-delay: 1.35s; }
+.m .capa.capa-entrou .capa-legenda { opacity: 1; transform: none; transition-delay: 1.6s; }
+
+/* links: o sublinhado cresce da esquerda no hover */
+.link, .obra-mais, .topo-nav a:not(.btn) {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat, linear-gradient(var(--linha), var(--linha)) 0 100% / 100% 1.5px no-repeat;
+  padding-bottom: .15em;
+  transition: background-size .45s var(--curva);
+}
+.link-claro { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat, linear-gradient(rgba(247,247,242,.45), rgba(247,247,242,.45)) 0 100% / 100% 1.5px no-repeat; }
+.topo-nav a:not(.btn) { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; }
+.link:hover, .topo-nav a:not(.btn):hover, .topo-nav a[aria-current="page"] { background-size: 100% 1.5px, 100% 1.5px; text-decoration: none; }
+@media (max-width: 860px) { .topo-nav a:not(.btn) { background: none; } }
+
+/* botões: leve elevação e seta de deslocamento no ícone */
+.btn, .btn-primary, .btn-dark, .btn-outline, .form-submit { transition: background .25s var(--curva), color .25s var(--curva), transform .35s var(--curva), box-shadow .35s var(--curva); }
+.btn:hover, .btn-dark:hover, .form-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(30, 50, 10, .45); }
+.btn:active, .btn-dark:active, .form-submit:active { transform: translateY(0); box-shadow: none; }
+
+/* transição entre páginas (navegadores com View Transitions; nos outros, troca normal) */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: vt-sai .35s var(--curva) both; }
+::view-transition-new(root) { animation: vt-entra .55s var(--curva) both; }
+::view-transition-group(*) { animation-duration: .7s; animation-timing-function: var(--curva-cortina); }
+@keyframes vt-sai { to { opacity: 0; transform: translateY(-12px); } }
+@keyframes vt-entra { from { opacity: 0; transform: translateY(16px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

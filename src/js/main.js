@@ -3,6 +3,7 @@ import { renderFooter } from './footer.js'
 import { initContactForm } from './formspree.js'
 import { PROJETOS, EMPRESA } from '../data/obras.js'
 import { esc } from './obras-ui.js'
+import { iniciarMovimento } from './motion.js'
 
 renderHeader()
 renderFooter()
@@ -18,7 +19,7 @@ document.getElementById('cta-terreno').innerHTML =
 document.getElementById('portfolio').innerHTML = PROJETOS.map((p, i) => `
   <a class="port${i === 0 ? ' port-maior' : ''}" href="/projeto.html?id=${p.slug}">
     <figure class="port-foto">
-      <img src="${p.imagem}" alt="${esc(p.nome)}: ${esc(p.imagemTipo.toLowerCase())}" loading="lazy">
+      <img src="${p.imagem}" alt="${esc(p.nome)}: ${esc(p.imagemTipo.toLowerCase())}" loading="lazy" style="view-transition-name:foto-${p.slug}">
       <figcaption>${esc(p.imagemTipo)}</figcaption>
     </figure>
     <div class="port-info">
@@ -34,3 +35,4 @@ document.getElementById('contato-canais').innerHTML = `
   <div class="canal"><span>E-mail</span><a href="mailto:${EMPRESA.email}">${EMPRESA.email}</a></div>
   <div class="canal"><span>Instagram</span><a href="https://instagram.com/${EMPRESA.instagram}" target="_blank" rel="noopener">@${EMPRESA.instagram}</a></div>`
 initContactForm()
+iniciarMovimento()

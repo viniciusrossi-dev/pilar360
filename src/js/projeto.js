@@ -2,6 +2,7 @@ import { renderHeader, waBotao } from './header.js'
 import { renderFooter } from './footer.js'
 import { getProjeto, faseAtual } from '../data/obras.js'
 import { trilhaFases, dataExtenso, esc } from './obras-ui.js'
+import { iniciarMovimento } from './motion.js'
 
 renderHeader('empreendimentos')
 renderFooter()
@@ -22,6 +23,7 @@ if (!p) {
   main.innerHTML = [cabeca(), visual(), sobre(), obra(), diario(), simulador(), cta()].join('')
   ligar3d()
   ligarSimulador()
+  iniciarMovimento()
 }
 
 function cabeca() {
@@ -48,7 +50,7 @@ function visual() {
   if (p.tem3d) {
     return `<section><div class="wrap">
       <div class="p-visual" id="p-3d">
-        <div class="p-3d-capa" style="background-image:url('${p.imagem}')">
+        <div class="p-3d-capa" style="background-image:url('${p.imagem}');view-transition-name:foto-${p.slug}">
           <button class="btn" id="abrir-3d" type="button">Explorar o prédio em 3D</button>
           <figcaption>${esc(p.imagemTipo)}</figcaption>
         </div>
@@ -62,7 +64,7 @@ function visual() {
   const g = p.galeria || []
   return `<section><div class="wrap">
     <div class="p-galeria">
-      ${g.map(i => `<figure><img src="${i.src}" alt="${esc(p.nome)}: ${esc(i.legenda)}" loading="lazy"><figcaption>${esc(i.legenda)}</figcaption></figure>`).join('')}
+      ${g.map(i => `<figure${i.src === p.imagem ? ' class="vt-alvo"' : ''}><img src="${i.src}"${i.src === p.imagem ? ` style="view-transition-name:foto-${p.slug}"` : ''} alt="${esc(p.nome)}: ${esc(i.legenda)}" loading="lazy"><figcaption>${esc(i.legenda)}</figcaption></figure>`).join('')}
     </div>
   </div></section>`
 }

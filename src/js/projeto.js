@@ -1,516 +1,210 @@
-import { supabase } from './supabase.js'
-import { renderHeader } from './header.js'
+import { renderHeader, waBotao } from './header.js'
 import { renderFooter } from './footer.js'
+import { getProjeto, semanaAtual } from '../data/obras.js'
+import { barraAvanco, itemDiario, esc } from './obras-ui.js'
 
-const WA_NUMBER = '5551992143280'
-
-renderHeader()
+renderHeader('obras')
 renderFooter()
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
+const main = document.getElementById('projeto-content')
+const slug = new URLSearchParams(location.search).get('id')
+const p = getProjeto(slug)
 
-function getSlug() {
-  const params = new URLSearchParams(window.location.search)
-  return params.get('id')
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+const brl = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v)
+
+if (!p) {
+  main.innerHTML = `<div class="wrap p-erro">
+    <h1 class="titulo">Obra não encontrada</h1>
+    <p class="lead" style="margin:1rem 0 2rem">O endereço pode ter mudado. As obras atuais estão na página inicial.</p>
+    <a class="btn-outline" href="/#obras">Ver as obras</a></div>`
+} else {
+  document.title = `${p.nome} — Pilar 360`
+  document.querySelector('meta[name="description"]')?.setAttribute('content', `${p.nome}, Rua 125 nº ${p.numero}, Alvorada: ${p.resumo}`)
+  main.innerHTML = [cabeca(), visual(), ficha(), cronograma(), diario(), simulador(), cta()].join('')
+  ligar3d()
+  ligarSimulador()
 }
 
-function formatMoeda(valor) {
-  if (!valor && valor !== 0) return '—'
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(valor)
+function cabeca() {
+  return `<section class="p-cabeca"><div class="wrap">
+    <a class="p-voltar" href="/#obras">← Todas as obras</a>
+    <div class="p-cabeca-grade">
+      <div>
+        <p class="p-endereco">Nº ${p.numero} · Rua 125 · Lote ${p.lote}</p>
+        <h1 class="titulo-xl">${esc(p.nome)}</h1>
+        <p class="lead">${esc(p.resumo)}</p>
+      </div>
+      <div>${barraAvanco(p)}</div>
+    </div>
+  </div></section>`
 }
 
-function formatMoedaDecimal(valor) {
-  if (!valor && valor !== 0) return '—'
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 }).format(valor)
+function visual() {
+  if (p.tem3d) {
+    return `<section><div class="wrap">
+      <div class="p-visual" id="p-3d">
+        <div class="p-3d-capa" style="background-image:url('${p.imagem}');aspect-ratio:16/9">
+          <button class="btn" id="abrir-3d" type="button">Abrir o prédio em 3D</button>
+          <figcaption>${esc(p.imagemTipo)}</figcaption>
+        </div>
+      </div>
+      <div class="p-visual-barra">
+        <span>Modelo 3D montado a partir da planta aprovada. Arraste para girar; troque de pavimento e de horário no painel.</span>
+        <a href="/3d/${p.slug.replace('residencial-', '')}.html" target="_blank" rel="noopener">Abrir em tela cheia</a>
+      </div>
+    </div></section>`
+  }
+  const g = p.galeria || []
+  return `<section><div class="wrap">
+    <div class="p-galeria">
+      ${g.map(i => `<figure><img src="${i.src}" alt="${esc(p.nome)}: ${esc(i.legenda)}" loading="lazy"><figcaption>${esc(i.legenda)}</figcaption></figure>`).join('')}
+    </div>
+  </div></section>`
 }
 
-function formatData(str) {
-  if (!str) return ''
-  const d = new Date(str + 'T00:00:00')
-  return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+function ficha() {
+  return `<section class="bloco"><div class="wrap p-duas">
+    <div>
+      <h2 class="titulo">Ficha técnica</h2>
+      <p class="texto" style="margin-top:1.2rem">Os dados que aparecem na placa da obra e nos documentos do prédio. Matrícula e alvará podem ser conferidos no Registro de Imóveis e na Prefeitura de Alvorada.</p>
+      <dl class="ficha" style="margin-top:2rem">
+        <div><dt>apartamentos</dt><dd class="num">${p.unidades}</dd></div>
+        <div><dt>por unidade</dt><dd>${esc(p.areaUnidade)}</dd></div>
+        <div><dt>terreno</dt><dd>${esc(p.terreno)}</dd></div>
+      </dl>
+    </div>
+    <dl class="carimbo">
+      <div class="carimbo-titulo"><img src="/imagens/logo.svg" alt="Pilar 360"><span>${esc(p.sistema)}</span></div>
+      ${p.carimbo.map(([k, v]) => `<div class="c"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
+    </dl>
+  </div></section>`
 }
 
-// Price formula (tabela Price / SAC simplificado → parcela constante)
-function calcParcelaPrice(pv, taxaAnual, meses) {
-  if (pv <= 0) return 0
-  const i = taxaAnual / 12 / 100
-  if (i === 0) return pv / meses
-  return pv * (i * Math.pow(1 + i, meses)) / (Math.pow(1 + i, meses) - 1)
-}
+function cronograma() {
+  if (!p.etapas) return ''
+  const total = p.duracaoSemanas
+  const ini = new Date(p.inicio + 'T00:00:00')
+  const sem = semanaAtual(p)
+  const diasTot = total * 7
+  const hojePct = sem > 0 ? Math.min(100, (Date.now() - ini) / 86400000 / diasTot * 100) : null
 
-// ─── Lightbox ──────────────────────────────────────────────────────────────
-
-function initLightbox() {
-  let overlay = document.getElementById('lightbox-overlay')
-  if (!overlay) {
-    overlay = document.createElement('div')
-    overlay.id = 'lightbox-overlay'
-    overlay.className = 'lightbox-overlay'
-    overlay.innerHTML = `
-      <button class="lightbox-close" aria-label="Fechar">&times;</button>
-      <img class="lightbox-img" src="" alt="Imagem ampliada">
-    `
-    document.body.appendChild(overlay)
+  // escala de meses
+  let meses = ''
+  const d = new Date(ini.getFullYear(), ini.getMonth() + 1, 1)
+  while ((d - ini) / 86400000 < diasTot) {
+    const pos = (d - ini) / 86400000 / diasTot * 100
+    const rot = d.getMonth() === 0 ? `${MESES[0]} ${String(d.getFullYear()).slice(2)}` : MESES[d.getMonth()]
+    if (d.getMonth() % 2 === 0 || d.getMonth() === 0) meses += `<span style="left:${pos}%">${rot}</span>`
+    d.setMonth(d.getMonth() + 1)
   }
 
-  const img = overlay.querySelector('.lightbox-img')
+  const linhas = p.etapas.map(e => {
+    const l = (e.semIni - 1) / total * 100
+    const w = (e.semFim - e.semIni + 1) / total * 100
+    return `<div class="crono-linha">
+      <span class="crono-nome"><i>${e.n}</i>${esc(e.nome)}</span>
+      <div class="crono-trilho">
+        <div class="crono-plan" style="left:${l}%;width:${w}%"><div class="crono-feito" style="width:${e.pct}%"></div></div>
+        ${hojePct !== null ? `<div class="crono-hoje" style="left:${hojePct}%"></div>` : ''}
+      </div>
+      <span class="crono-pct${e.pct === 100 ? ' ok' : ''}">${e.pct}%</span>
+    </div>`
+  }).join('')
 
-  function openLightbox(src, alt) {
-    img.src = src
-    img.alt = alt || ''
-    overlay.classList.add('active')
-    document.body.style.overflow = 'hidden'
-  }
+  const inicioTxt = `${ini.getDate()} de ${['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][ini.getMonth()]} de ${ini.getFullYear()}`
+  return `<section class="bloco" id="cronograma" style="padding-top:0"><div class="wrap">
+    <div class="bloco-cabeca">
+      <h2 class="titulo">Cronograma</h2>
+      <p class="texto">As ${p.etapas.length} etapas do contrato de execução, em ${total} semanas contadas a partir da furação das estacas (${sem > 0 ? 'iniciada em' : 'prevista para'} ${inicioTxt}). O avanço de cada etapa é atualizado depois da reunião semanal de obra.</p>
+    </div>
+    <div class="crono" role="table" aria-label="Cronograma de etapas da obra">
+      <div class="crono-escala" aria-hidden="true"><span>Etapa</span><div class="crono-meses">${meses}</div><span style="text-align:right">feito</span></div>
+      ${linhas}
+    </div>
+    <div class="crono-legenda"><span><i></i>planejado</span><span><i class="f"></i>executado</span>${hojePct !== null ? '<span><i class="h"></i>hoje</span>' : ''}</div>
+  </div></section>`
+}
 
-  function closeLightbox() {
-    overlay.classList.remove('active')
-    document.body.style.overflow = ''
-    setTimeout(() => { img.src = '' }, 300)
-  }
+function diario() {
+  const d = (p.diario || []).slice().sort((a, b) => b.data.localeCompare(a.data))
+  if (!d.length) return ''
+  return `<section class="bloco" style="padding-top:0"><div class="wrap">
+    <div class="bloco-cabeca">
+      <h2 class="titulo">Diário de obra</h2>
+      <p class="texto">Do mais recente para o mais antigo.</p>
+    </div>
+    <ol class="diario sem-obra">${d.map(e => itemDiario(e)).join('')}</ol>
+  </div></section>`
+}
 
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target.classList.contains('lightbox-close')) {
-      closeLightbox()
-    }
+function simulador() {
+  return `<section class="bloco" style="padding-top:0"><div class="wrap">
+    <div class="sim">
+      <h2 class="subtitulo" style="font-size:clamp(2rem,4vw,2.8rem)">Quanto ficaria a parcela?</h2>
+      <p class="texto" style="margin-top:.6rem">Uma conta rápida para ter ideia do enquadramento no Minha Casa Minha Vida. A simulação oficial é feita com a Caixa.</p>
+      <form class="sim-form" id="sim" novalidate>
+        <div class="form-group"><label for="sim-renda">Renda familiar bruta por mês</label><input id="sim-renda" inputmode="decimal" placeholder="R$ 3.500"></div>
+        <div class="form-group"><label for="sim-valor">Valor do imóvel</label><input id="sim-valor" inputmode="decimal" placeholder="Consulte a tabela com a gente"></div>
+        <button class="btn-dark" type="submit">Calcular</button>
+      </form>
+      <div id="sim-res" aria-live="polite"></div>
+    </div>
+  </div></section>`
+}
+
+function cta() {
+  return `<section class="bloco" style="padding-top:0"><div class="wrap p-cta">
+    <h2 class="titulo" style="max-width:10em">Quer visitar ou saber valores?</h2>
+    ${waBotao('Falar sobre o ' + p.nome.replace('Residencial ', ''), `Olá! Quero saber mais sobre o ${p.nome}.`)}
+  </div></section>`
+}
+
+function ligar3d() {
+  const b = document.getElementById('abrir-3d')
+  if (!b) return
+  b.addEventListener('click', () => {
+    const box = document.getElementById('p-3d')
+    box.innerHTML = `<iframe src="/3d/${p.slug.replace('residencial-', '')}.html" title="${esc(p.nome)} em 3D" allow="fullscreen" loading="eager"></iframe>`
   })
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox()
-  })
-
-  // Delegate: any element with data-lightbox
-  document.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-lightbox]')
-    if (el) {
-      e.preventDefault()
-      openLightbox(el.dataset.lightbox, el.dataset.lightboxAlt)
-    }
-  })
 }
 
-// ─── Fade-in observer ──────────────────────────────────────────────────────
+// Faixas do MCMV vigentes desde 22/04/2026 (renda familiar bruta mensal).
+// Juros aproximados por faixa; a Caixa define a taxa final pelo perfil do comprador.
+const FAIXAS = [
+  { ate: 3200, nome: 'Faixa 1', juros: 4.5 },
+  { ate: 5000, nome: 'Faixa 2', juros: 6 },
+  { ate: 9600, nome: 'Faixa 3', juros: 8.16 },
+  { ate: 13000, nome: 'Faixa 4', juros: 10 },
+]
 
-function initFadeObserver() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible')
-        observer.unobserve(entry.target)
-      }
-    })
-  }, { threshold: 0.1 })
-
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el))
-}
-
-// ─── Simulator ─────────────────────────────────────────────────────────────
-
-function initSimulator(projeto) {
-  const form = document.getElementById('simulador-form')
-  if (!form) return
-
-  const inputRenda = document.getElementById('sim-renda')
-  const inputValor = document.getElementById('sim-valor')
-  const btnSimular = document.getElementById('sim-btn')
-  const resultDiv = document.getElementById('sim-resultado')
-
-  if (inputValor && projeto.valor_base) {
-    inputValor.value = formatMoedaDecimal(projeto.valor_base).replace('R$\u00a0', '').replace('R$ ', '')
-  }
-
-  function parseBRL(str) {
-    if (!str) return 0
-    return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0
-  }
-
-  function getFaixa(renda) {
-    if (renda <= 2640) return { nome: 'Faixa 1', subsidioMax: 55000, subsidioPerc: 0.5, juros: 4 }
-    if (renda <= 4400) return { nome: 'Faixa 2', subsidioMax: 35000, subsidioPerc: 0.25, juros: 5.5 }
-    if (renda <= 8000) return { nome: 'Faixa 3', subsidioMax: 0, subsidioPerc: 0, juros: 7.5 }
-    return { nome: 'Acima do limite', subsidioMax: 0, subsidioPerc: 0, juros: 9 }
-  }
-
-  btnSimular.addEventListener('click', () => {
-    const renda = parseBRL(inputRenda.value)
-    const valor = parseBRL(inputValor.value)
-
+function ligarSimulador() {
+  const f = document.getElementById('sim')
+  if (!f) return
+  const num = (s) => parseFloat(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0
+  f.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const renda = num(f.querySelector('#sim-renda').value)
+    const valor = num(f.querySelector('#sim-valor').value)
+    const out = document.getElementById('sim-res')
     if (!renda || !valor) {
-      resultDiv.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;">Preencha a renda familiar e o valor do imóvel.</p>'
+      out.innerHTML = '<p class="sim-erro">Preencha a renda e o valor do imóvel para calcular.</p>'
       return
     }
-
-    const faixa = getFaixa(renda)
-    const subsidio = Math.min(valor * faixa.subsidioPerc, faixa.subsidioMax)
-    const financiado = Math.max(valor - subsidio, 0)
-    const entrada = financiado * 0.2
-    const financiadoLiq = financiado - entrada
-    const parcela = calcParcelaPrice(financiadoLiq, faixa.juros, 420)
-    const pctRenda = renda > 0 ? (parcela / renda * 100).toFixed(1) : '—'
-
-    const waMsg = encodeURIComponent(
-      `Olá! Tenho interesse no ${projeto.nome}.\n` +
-      `Renda familiar: ${formatMoedaDecimal(renda)}\n` +
-      `Enquadramento: ${faixa.nome}\n` +
-      `Valor do imóvel: ${formatMoeda(valor)}\n` +
-      `Subsídio estimado: ${formatMoeda(subsidio)}\n` +
-      `Parcela estimada: ${formatMoedaDecimal(parcela)}/mês\n` +
-      `Gostaria de saber mais.`
-    )
-
-    resultDiv.innerHTML = `
-      <div class="sim-grid fade-in">
-        <div class="sim-card">
-          <div class="sim-card-label">Enquadramento</div>
-          <div class="sim-card-val">${faixa.nome}</div>
-        </div>
-        <div class="sim-card">
-          <div class="sim-card-label">Subsídio estimado</div>
-          <div class="sim-card-val">${formatMoeda(subsidio)}</div>
-        </div>
-        <div class="sim-card">
-          <div class="sim-card-label">Entrada (20%)</div>
-          <div class="sim-card-val">${formatMoeda(entrada)}</div>
-        </div>
-        <div class="sim-card sim-card--destaque">
-          <div class="sim-card-label">Parcela estimada</div>
-          <div class="sim-card-val sim-val--destaque">${formatMoedaDecimal(parcela)}<span>/mês</span></div>
-          <div class="sim-card-sub">${pctRenda}% da renda · ${faixa.juros}% a.a. · 420 meses</div>
-        </div>
-      </div>
-      <div style="margin-top:1.5rem;">
-        <a
-          href="https://wa.me/${WA_NUMBER}?text=${waMsg}"
-          target="_blank"
-          rel="noopener"
-          class="btn-primary sim-wa-btn"
-        >Falar com um consultor</a>
-        <p class="sim-disclaimer">* Simulação estimada. Subsídio, taxas e prazos sujeitos à aprovação da Caixa Econômica Federal.</p>
-      </div>
-    `
-    setTimeout(initFadeObserver, 50)
+    const faixa = FAIXAS.find(x => renda <= x.ate)
+    if (!faixa) {
+      out.innerHTML = '<p class="sim-erro">Essa renda fica acima do limite do programa (R$ 13.000). Fale com a gente sobre outras formas de financiamento.</p>'
+      return
+    }
+    const financiado = valor * 0.8
+    const i = faixa.juros / 12 / 100
+    const n = 420
+    const parcela = financiado * i * Math.pow(1 + i, n) / (Math.pow(1 + i, n) - 1)
+    out.innerHTML = `<dl class="sim-res">
+        <div><dt>enquadramento</dt><dd>${faixa.nome}</dd></div>
+        <div><dt>entrada mínima (20%)</dt><dd class="num">${brl(valor * 0.2)}</dd></div>
+        <div><dt>parcela estimada</dt><dd class="num">${brl(parcela)}</dd></div>
+      </dl>
+      <p class="sim-nota">Conta sem subsídio: nas faixas 1 e 2 o subsídio do governo e o FGTS podem reduzir a entrada e a parcela. Juros de referência de ${String(faixa.juros).replace('.', ',')}% ao ano, 420 meses, tabela Price. A Caixa define taxa, prazo e subsídio na análise de crédito.</p>`
   })
 }
-
-// ─── Render sections ───────────────────────────────────────────────────────
-
-function renderHero(projeto) {
-  const imgStyle = projeto.imagem_capa
-    ? `background-image: url('${projeto.imagem_capa}')`
-    : `background: var(--cinza-escuro)`
-
-  return `
-    <section class="projeto-hero fade-in" style="${imgStyle}">
-      <div class="projeto-hero-overlay"></div>
-      <div class="projeto-hero-content">
-        ${projeto.status ? `<span class="projeto-status-badge">${projeto.status}</span>` : ''}
-        <h1 class="projeto-hero-title">${projeto.nome || 'Projeto'}</h1>
-        ${projeto.localizacao ? `<div class="projeto-hero-local">${projeto.localizacao}</div>` : ''}
-      </div>
-    </section>
-  `
-}
-
-function renderSpecsBar(projeto) {
-  const specs = [
-    { label: 'Unidades', valor: projeto.total_unidades ?? '—' },
-    { label: 'Metragem', valor: projeto.metragem_range || '—' },
-    { label: 'Entrega', valor: projeto.previsao_entrega ? formatData(projeto.previsao_entrega) : '—' },
-    { label: 'Valor Base', valor: projeto.valor_base ? formatMoeda(projeto.valor_base) : '—' },
-  ]
-  return `
-    <div class="projeto-specs-bar fade-in">
-      ${specs.map(s => `
-        <div class="projeto-specs-item">
-          <span class="projeto-specs-val">${s.valor}</span>
-          <span class="projeto-specs-label">${s.label}</span>
-        </div>
-      `).join('')}
-    </div>
-  `
-}
-
-function renderDescricaoGaleria(projeto, imagens) {
-  const galeriaItems = imagens.length
-    ? imagens.map(img => `
-        <div
-          class="galeria-item"
-          data-lightbox="${img.url}"
-          data-lightbox-alt="${img.legenda || projeto.nome}"
-          role="button"
-          tabindex="0"
-          aria-label="Ampliar imagem${img.legenda ? ': ' + img.legenda : ''}"
-        >
-          <img src="${img.url}" alt="${img.legenda || projeto.nome}" loading="lazy">
-          ${img.legenda ? `<div class="galeria-item-legend">${img.legenda}</div>` : ''}
-        </div>
-      `).join('')
-    : '<p style="color:var(--branco-suave);font-size:0.85rem;">Galeria em breve.</p>'
-
-  return `
-    <section class="projeto-descricao-section fade-in">
-      <div class="projeto-descricao-grid">
-        <div class="projeto-descricao">
-          <span class="section-label">Sobre o projeto</span>
-          <h2 class="section-title">${projeto.nome}</h2>
-          <p class="section-text">${projeto.descricao || 'Descrição em breve.'}</p>
-          ${projeto.diferenciais ? `
-            <ul class="projeto-diferenciais">
-              ${projeto.diferenciais.map(d => `<li>${d}</li>`).join('')}
-            </ul>
-          ` : ''}
-        </div>
-        <div class="projeto-galeria">
-          ${galeriaItems}
-        </div>
-      </div>
-    </section>
-  `
-}
-
-function renderPlanta(projeto) {
-  if (!projeto.imagem_planta) return ''
-  return `
-    <section class="projeto-planta-section fade-in">
-      <span class="section-label">Planta</span>
-      <h2 class="section-title">Planta do Imóvel</h2>
-      <div class="projeto-planta-wrapper">
-        <img
-          src="${projeto.imagem_planta}"
-          alt="Planta ${projeto.nome}"
-          class="projeto-planta-img"
-          data-lightbox="${projeto.imagem_planta}"
-          data-lightbox-alt="Planta ${projeto.nome}"
-          role="button"
-          tabindex="0"
-        >
-        <p class="projeto-planta-hint">Clique na imagem para ampliar</p>
-      </div>
-    </section>
-  `
-}
-
-function renderUnidades(unidades) {
-  if (!unidades || !unidades.length) return ''
-
-  const statusLabel = { disponivel: 'Disponível', reservada: 'Reservada', vendida: 'Vendida' }
-  const statusClass = { disponivel: 'status-disponivel', reservada: 'status-reservada', vendida: 'status-vendida' }
-
-  return `
-    <section class="projeto-unidades-section fade-in">
-      <span class="section-label">Disponibilidade</span>
-      <h2 class="section-title">Tabela de Unidades</h2>
-      <div class="unidades-table-wrapper">
-        <table class="unidades-table">
-          <thead>
-            <tr>
-              <th>Unidade</th>
-              <th>Tipologia</th>
-              <th>Metragem</th>
-              <th>Andar</th>
-              <th>Valor</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${unidades.map(u => `
-              <tr>
-                <td>${u.nome || '—'}</td>
-                <td>${u.tipologia || '—'}</td>
-                <td>${u.metragem ? u.metragem + 'm²' : '—'}</td>
-                <td>${u.andar ?? '—'}</td>
-                <td>${u.valor ? formatMoeda(u.valor) : '—'}</td>
-                <td>
-                  <span class="unidade-status ${statusClass[u.status] || ''}">
-                    ${statusLabel[u.status] || u.status || '—'}
-                  </span>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  `
-}
-
-function renderSimulador(projeto) {
-  return `
-    <section class="projeto-simulador-section fade-in">
-      <span class="section-label">Financiamento</span>
-      <h2 class="section-title">Simulador MCMV</h2>
-      <p class="section-text">Descubra seu enquadramento e estime sua parcela mensal no programa Minha Casa Minha Vida.</p>
-      <form class="simulador-form" id="simulador-form" onsubmit="return false;">
-        <div class="form-group">
-          <label for="sim-renda">Renda familiar bruta</label>
-          <input
-            type="text"
-            id="sim-renda"
-            placeholder="Ex: 3.500,00"
-            inputmode="decimal"
-          >
-        </div>
-        <div class="form-group">
-          <label for="sim-valor">Valor do imóvel</label>
-          <input
-            type="text"
-            id="sim-valor"
-            placeholder="Ex: 150.000,00"
-            inputmode="decimal"
-          >
-        </div>
-        <div class="sim-btn-wrapper">
-          <button type="button" class="btn-primary" id="sim-btn">Simular</button>
-        </div>
-      </form>
-      <div id="sim-resultado"></div>
-    </section>
-  `
-}
-
-function renderTimeline(updates) {
-  if (!updates || !updates.length) return ''
-
-  // Sort most recent first
-  const sorted = [...updates].sort((a, b) => new Date(b.data) - new Date(a.data))
-
-  return `
-    <section class="projeto-timeline-section fade-in">
-      <span class="section-label">Obra</span>
-      <h2 class="section-title">Atualizações</h2>
-      <div class="timeline">
-        ${sorted.map((item, i) => `
-          <div class="timeline-item fade-in">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <div class="timeline-data">${formatData(item.data)}</div>
-              <div class="timeline-titulo">${item.titulo || ''}</div>
-              ${item.descricao ? `<p class="timeline-desc">${item.descricao}</p>` : ''}
-              ${item.foto_url ? `
-                <div
-                  class="timeline-foto"
-                  data-lightbox="${item.foto_url}"
-                  data-lightbox-alt="${item.titulo || 'Atualização de obra'}"
-                  role="button"
-                  tabindex="0"
-                >
-                  <img src="${item.foto_url}" alt="${item.titulo || 'Atualização'}" loading="lazy">
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </section>
-  `
-}
-
-function renderCTA(projeto) {
-  const waMsg = encodeURIComponent(`Olá! Tenho interesse no ${projeto.nome}. Gostaria de mais informações.`)
-  return `
-    <section class="projeto-cta fade-in">
-      <div class="projeto-cta-inner">
-        <h2 class="projeto-cta-title">Gostou? Entre em contato.</h2>
-        <p class="projeto-cta-sub">Nossa equipe está pronta para tirar suas dúvidas e ajudar você a conquistar seu imóvel.</p>
-        <div class="projeto-cta-btns">
-          <a
-            href="https://wa.me/${WA_NUMBER}?text=${waMsg}"
-            target="_blank"
-            rel="noopener"
-            class="btn-primary"
-          >WhatsApp</a>
-          <a href="/#contato" class="btn-outline">Formulário de contato</a>
-        </div>
-      </div>
-    </section>
-  `
-}
-
-// ─── Main ──────────────────────────────────────────────────────────────────
-
-async function init() {
-  const slug = getSlug()
-  if (!slug) {
-    window.location.href = '/'
-    return
-  }
-
-  const main = document.getElementById('projeto-content')
-
-  // Load project
-  const { data: projeto, error: projError } = await supabase
-    .from('projeto')
-    .select('*')
-    .eq('slug', slug)
-    .single()
-
-  if (projError || !projeto) {
-    main.innerHTML = `
-      <div class="projeto-loading">
-        <p>Projeto não encontrado.</p>
-        <a href="/" class="btn-outline" style="margin-top:1.5rem;">Voltar ao início</a>
-      </div>
-    `
-    return
-  }
-
-  // Parallel queries
-  const [imagensRes, unidadesRes, updatesRes] = await Promise.all([
-    supabase
-      .from('projeto_imagem')
-      .select('*')
-      .eq('projeto_id', projeto.id)
-      .order('sort_order', { ascending: true }),
-    supabase
-      .from('projeto_unidade')
-      .select('*')
-      .eq('projeto_id', projeto.id)
-      .order('andar', { ascending: true }),
-    supabase
-      .from('projeto_update')
-      .select('*')
-      .eq('projeto_id', projeto.id)
-      .order('data', { ascending: false }),
-  ])
-
-  const imagens = imagensRes.data || []
-  const unidades = unidadesRes.data || []
-  const updates = updatesRes.data || []
-
-  // Update meta
-  document.title = `${projeto.nome} — Pilar360`
-  const ogTitle = document.getElementById('og-title')
-  const ogDesc = document.getElementById('og-desc')
-  const ogImage = document.getElementById('og-image')
-  if (ogTitle) ogTitle.setAttribute('content', projeto.nome)
-  if (ogDesc) ogDesc.setAttribute('content', projeto.descricao || '')
-  if (ogImage && projeto.imagem_capa) ogImage.setAttribute('content', projeto.imagem_capa)
-
-  // Render all sections
-  main.innerHTML = [
-    renderHero(projeto),
-    renderSpecsBar(projeto),
-    renderDescricaoGaleria(projeto, imagens),
-    renderPlanta(projeto),
-    renderUnidades(unidades),
-    renderSimulador(projeto),
-    renderTimeline(updates),
-    renderCTA(projeto),
-  ].join('')
-
-  // Init interactions
-  initLightbox()
-  initSimulator(projeto)
-  initFadeObserver()
-}
-
-init().catch(() => {
-  const main = document.getElementById('projeto-content')
-  if (main) {
-    main.innerHTML = `
-      <div class="projeto-loading">
-        <p>Não foi possível carregar o projeto agora.</p>
-        <a href="/#contato" class="btn-primary" style="margin-top:1.5rem;">Falar com a gente</a>
-      </div>
-    `
-  }
-})

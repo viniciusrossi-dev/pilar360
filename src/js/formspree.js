@@ -1,70 +1,47 @@
+// Formulário de contato: monta a mensagem e abre no WhatsApp da Pilar.
+// Em paralelo tenta registrar no Supabase (tabela contato_mensagem) para o admin.
+// Se o banco estiver fora do ar, o contato chega do mesmo jeito pelo WhatsApp.
 import { supabase } from './supabase.js'
-
-const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID
+import { EMPRESA } from '../data/obras.js'
 
 export function initContactForm() {
   const form = document.querySelector('.contato-form')
   if (!form) return
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault()
-    const btn = form.querySelector('.form-submit')
-    const originalText = btn.textContent
-    btn.textContent = 'Enviando...'
-    btn.disabled = true
+    const v = (n) => (form.querySelector(`[name="${n}"]`)?.value || '').trim()
+    const dados = { nome: v('nome'), telefone: v('telefone'), perfil: v('perfil'), mensagem: v('mensagem') }
 
-    const data = {
-      nome: form.querySelector('[name="nome"]').value.trim(),
-      telefone: form.querySelector('[name="telefone"]').value.trim(),
-      email: form.querySelector('[name="email"]').value.trim(),
-      perfil: form.querySelector('[name="perfil"]').value,
-      mensagem: form.querySelector('[name="mensagem"]').value.trim(),
-    }
-
-    if (!data.nome || !data.email || !data.mensagem) {
-      showFormFeedback(form, 'Por favor, preencha nome, email e mensagem.', 'error')
-      btn.textContent = originalText
-      btn.disabled = false
+    if (!dados.nome || !dados.mensagem) {
+      feedback(form, 'Escreva seu nome e a mensagem para enviar.', 'error')
+      ;(dados.nome ? form.querySelector('[name="mensagem"]') : form.querySelector('[name="nome"]')).focus()
       return
     }
 
+    const texto = `Olá! Sou ${dados.nome}${dados.telefone ? ` (${dados.telefone})` : ''}.\n` +
+      `Assunto: ${dados.perfil}.\n\n${dados.mensagem}`
+    window.open(`https://wa.me/${EMPRESA.whatsapp}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener')
+
+    // registro opcional, sem bloquear o envio
     try {
-      const [supaResult, formspreeResult] = await Promise.allSettled([
-        supabase.from('contato_mensagem').insert([data]),
-        fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        }),
-      ])
+      supabase.from('contato_mensagem')
+        .insert([{ ...dados, email: '-' }])
+        .then(() => {}, () => {})
+    } catch (err) { /* banco indisponível */ }
 
-      const anySuccess = (supaResult.status === 'fulfilled' && !supaResult.value.error)
-        || (formspreeResult.status === 'fulfilled' && formspreeResult.value.ok)
-
-      if (anySuccess) {
-        showFormFeedback(form, 'Mensagem enviada! Retornaremos em breve.', 'success')
-        form.reset()
-      } else {
-        throw new Error('Ambos os envios falharam')
-      }
-    } catch (err) {
-      console.error('Contact form error:', err)
-      showFormFeedback(form, 'Erro ao enviar. Tente novamente ou entre em contato por WhatsApp.', 'error')
-    } finally {
-      btn.textContent = originalText
-      btn.disabled = false
-    }
+    feedback(form, 'Abrimos o WhatsApp com a sua mensagem. É só confirmar o envio por lá.', 'success')
+    form.reset()
   })
 }
 
-function showFormFeedback(form, message, type) {
+function feedback(form, mensagem, tipo) {
   let el = form.querySelector('.form-feedback')
   if (!el) {
     el = document.createElement('div')
-    el.className = 'form-feedback'
+    el.setAttribute('role', 'status')
     form.appendChild(el)
   }
-  el.textContent = message
-  el.className = `form-feedback form-feedback--${type}`
-  setTimeout(() => el.remove(), 6000)
+  el.textContent = mensagem
+  el.className = `form-feedback form-feedback--${tipo}`
 }

@@ -24,6 +24,21 @@ if (!p) {
   ligar3d()
   ligarSimulador()
   iniciarMovimento()
+  irParaOTopo()
+}
+
+// A página do empreendimento sempre abre no topo. Sem isso, alguns navegadores
+// (e a prévia dentro de outra página) mantêm a rolagem da home ou da visita anterior.
+function irParaOTopo() {
+  if (location.hash) return
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+  const topo = () => {
+    window.scrollTo(0, 0)
+    document.getElementById('site-header')?.scrollIntoView({ block: 'start' })
+  }
+  topo()
+  requestAnimationFrame(topo)
+  window.addEventListener('load', topo, { once: true })
 }
 
 function cabeca() {

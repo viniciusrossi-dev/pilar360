@@ -95,7 +95,7 @@ function sobre() {
         <div class="carimbo-titulo"><img src="/imagens/logo.svg" alt="Pilar 360"><span>Documentação</span></div>
         ${p.carimbo.map(([k, v]) => `<div class="c"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
       </dl>
-      <p class="form-nota" style="margin-top:.8rem">Dados públicos do registro de imóveis e da prefeitura, para você conferir.</p>
+      <p class="form-nota" style="margin-top:.8rem">Matrícula, alvará e ART ficam à disposição para consulta na visita ou a pedido.</p>
     </div>
   </div></section>`
 }
@@ -196,9 +196,10 @@ function ligarSimulador() {
     const parcela = financiado * i * Math.pow(1 + i, n) / (Math.pow(1 + i, n) - 1)
     out.innerHTML = `<dl class="sim-res">
         <div><dt>enquadramento</dt><dd>${faixa.nome}</dd></div>
-        <div><dt>entrada mínima (20%)</dt><dd class="num">${brl(valor * 0.2)}</dd></div>
+        <div><dt>entrada</dt><dd>A consultar</dd></div>
         <div><dt>parcela estimada</dt><dd class="num">${brl(parcela)}</dd></div>
       </dl>
-      <p class="sim-nota">Conta sem subsídio: nas faixas 1 e 2 o subsídio do governo e o FGTS podem reduzir a entrada e a parcela. Juros de referência de ${String(faixa.juros).replace('.', ',')}% ao ano, 420 meses, tabela Price. A Caixa define taxa, prazo e subsídio na análise de crédito.</p>`
+      <p class="sim-destaque">O subsídio do Minha Casa Minha Vida, o FGTS e outras condições podem abater até 100% da entrada.</p>
+      <p class="sim-nota">Estimativa sem subsídio. Juros de referência de ${String(faixa.juros).replace('.', ',')}% ao ano, 420 meses, tabela Price. A Caixa define taxa, prazo e subsídio na análise de crédito.</p>`
   })
 }

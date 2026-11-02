@@ -509,3 +509,5 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+.sim-destaque { margin-top: 1.4rem; padding: .9rem 1.1rem; background: var(--verde-claro); border-left: 3px solid var(--verde); font-weight: 700; color: #2C4A12; max-width: 46em; }
